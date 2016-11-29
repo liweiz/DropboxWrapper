@@ -1,0 +1,19 @@
+PODS:
+  - Alamofire (4.0.1)
+  - SwiftyDropbox (4.1.1):
+    - Alamofire (~> 4.0.1)
+
+DEPENDENCIES:
+  - SwiftyDropbox (from `../`)
+
+EXTERNAL SOURCES:
+  SwiftyDropbox:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Alamofire: 7682d43245de14874acd142ec137b144aa1dd335
+  SwiftyDropbox: dfcd4d308d32d74729255b48833db61acdfb9c23
+
+PODFILE CHECKSUM: cda7778a68b8e1516da95c603eec2ef267d40ce9
+
+COCOAPODS: 1.1.0.rc.2

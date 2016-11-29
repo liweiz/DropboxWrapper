@@ -1,0 +1,4 @@
+# SwiftyDropbox
+github "dropbox/SwiftyDropbox" ~> 4.1.0
+# RxSwift
+github "ReactiveX/RxSwift" ~> 3.0
