@@ -30,40 +30,28 @@ public struct Path {
 /// Request to API.
 open class DropboxRequest {
     /// Worker.
-    var worker: DropboxWorker?
-    public var client: DropboxClient {
-        get { return worker!.client }
-    }
-    public var queues: [DispatchQueue] {
-        get { return worker!.dispatchQueues }
-    }
+    var worker: DropboxWorker!
+    public var client: DropboxClient  { return worker!.client }
+    public var queues: [DispatchQueue] { return worker!.dispatchQueues }
     /// Path.
-    var path: Path?
-    public var dirPath: String {
-        get { return path!.dirPath }
-    }
-    public var objName: String {
-        get { return path!.objName }
-    }
-    public var fullPath: String {
-        get { return path!.dirPath + "/" + path!.objName }
-    }
+    var path: Path!
+    public var dirPath: String { return path.dirPath }
+    public var objName: String { return path.objName }
+    public var fullPath: String { return path.dirPath + "/" + path!.objName }
     public var dirPathUrl: URL? {
-        get {
-            guard let url = URL(string: dirPath) else {
-                return nil
-            }
-            return url }
+        guard let url = URL(string: dirPath) else {
+            return nil
+        }
+        return url
     }
     public var fullPathUrl: URL? {
-        get {
-            guard let url = URL(string: path!.dirPath + "/" + path!.objName) else {
-                return nil
-            }
-            return url }
+        guard let url = URL(string: path!.dirPath + "/" + path!.objName) else {
+            return nil
+        }
+        return url
     }
     /// Error handler.
-    var errorHandler: ((CustomStringConvertible) -> Void)?
+    var errorHandler: ((CustomStringConvertible) -> Void)!
     /// Queue.
     public var queue: DispatchQueue = DispatchQueue.main
 }

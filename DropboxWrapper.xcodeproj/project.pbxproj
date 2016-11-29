@@ -17,6 +17,7 @@
 		EE1EA6EE1DED3C5A00B176EB /* ConvertedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6ED1DED3C5A00B176EB /* ConvertedError.swift */; };
 		EE1EA6F01DED3D0000B176EB /* TypeErasedResponseFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6EF1DED3D0000B176EB /* TypeErasedResponseFunc.swift */; };
 		EE1EA6F21DED3D6400B176EB /* RequestRx.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6F11DED3D6400B176EB /* RequestRx.swift */; };
+		EEE7F3931DEE287F00ED5C8D /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE7F3921DEE287F00ED5C8D /* StringHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 		EE1EA6ED1DED3C5A00B176EB /* ConvertedError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvertedError.swift; sourceTree = "<group>"; };
 		EE1EA6EF1DED3D0000B176EB /* TypeErasedResponseFunc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeErasedResponseFunc.swift; sourceTree = "<group>"; };
 		EE1EA6F11DED3D6400B176EB /* RequestRx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestRx.swift; sourceTree = "<group>"; };
+		EEE7F3921DEE287F00ED5C8D /* StringHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 				EE1EA69F1DED314700B176EB /* Request.swift */,
 				EE1EA6F11DED3D6400B176EB /* RequestRx.swift */,
 				EE1EA6EF1DED3D0000B176EB /* TypeErasedResponseFunc.swift */,
+				EEE7F3921DEE287F00ED5C8D /* StringHelper.swift */,
 				EE1EA6891DED311100B176EB /* Info.plist */,
 			);
 			path = DropboxWrapper;
@@ -253,6 +256,7 @@
 				EE1EA6A01DED314700B176EB /* Request.swift in Sources */,
 				EE1EA6F21DED3D6400B176EB /* RequestRx.swift in Sources */,
 				EE1EA6EE1DED3C5A00B176EB /* ConvertedError.swift in Sources */,
+				EEE7F3931DEE287F00ED5C8D /* StringHelper.swift in Sources */,
 				EE1EA6F01DED3D0000B176EB /* TypeErasedResponseFunc.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -469,6 +473,7 @@
 				EE1EA69B1DED311100B176EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		EE1EA69C1DED311100B176EB /* Build configuration list for PBXNativeTarget "DropboxWrapperTests" */ = {
 			isa = XCConfigurationList;
@@ -477,6 +482,7 @@
 				EE1EA69E1DED311100B176EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

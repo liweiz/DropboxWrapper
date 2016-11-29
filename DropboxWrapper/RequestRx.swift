@@ -10,47 +10,23 @@ import Foundation
 import SwiftyDropbox
 import RxSwift
 
-/// Wrapper turns API response func to an obverable.
-func observableDropboxResponse<Ok, Err, Req>(queue: DispatchQueue? = nil, responsable: AnyDropboxResponsable<Ok, Err, Req>) -> Observable<Ok> {
-    return Observable.create { observer in
-        responsable.response(queue: queue, completionHandler: {
-            switch $0 {
-            case (nil, let err?):
-                observer.on(.error(err))
-            case (let res?, nil):
-                observer.on(.next(res))
-                observer.on(.completed)
-            default:
-                print("No info in response.")
-            }
-        })
-        return Disposables.create()
-    }
-}
-
 /// Rx wrapper for API request.
 open class DropboxRequestRx: DropboxRequest {
     open var disposeBag: DisposeBag = DisposeBag()
     public var dirPathUrlRx: URL? {
-        get {
-            guard let url = URL(string: dirPath) else {
-                errorHandlerRx!(Files.LookupError.malformedPath(nil) as! Error)
-                return nil
-            }
-            return url }
+        guard let url = URL(string: dirPath) else {
+            errorHandlerRx(Files.LookupError.malformedPath(nil) as! Error)
+            return nil
+        }
+        return url
     }
-    /// Wrapper to meet the error type from Rx.
-    public var errorHandlerRx: ((Error) -> Void)? {
-        get {
-            guard let h = errorHandler else {
-                return nil
+    /// Adapter to meet the error type requirement of Rx.
+    public var errorHandlerRx: ((Error) -> Void) {
+        return {
+            guard let err = $0 as? CustomStringConvertible else {
+                return
             }
-            return {
-                guard let err = $0 as? CustomStringConvertible else {
-                    return
-                }
-                h(err)
-            }
+            self.errorHandler(err)
         }
     }
 }
@@ -65,7 +41,16 @@ public func createDropboxRequestRx(worker: DropboxWorker, path: Path, errorHandl
 }
 
 /// Requests.
-extension DropboxRequestRx {
+protocol RequestMakable {
+    associatedtype ResultA
+    associatedtype ResultB
+    func upload(fileData: Data, completionHandler: @escaping (ResultA) -> Void)
+    func listing(all: Bool, doneHandler: @escaping ([ResultA]) -> Void)
+    func continueListing(from cursor: String, previousResults: [ResultA], doneHandler: @escaping ([ResultA]) -> Void)
+    func createFolder(completionHandler: @escaping (ResultB) -> Void)
+}
+
+extension DropboxRequestRx : RequestMakable {
     
     /// Upload request.
     
@@ -75,14 +60,13 @@ extension DropboxRequestRx {
     public typealias ErrUpSerializer = Files.UploadErrorSerializer
     public typealias ReqUp = UploadRequest<OkUpSerializer, ErrUpSerializer>
     
-    public func upload(fileData: Data,
-                completionHandler: @escaping (OkUp) -> Void) {
+    public func upload(fileData: Data, completionHandler: @escaping (OkUp) -> Void) {
         let request = client.files.upload(path: dirPath, input: fileData)
         let responsable = AnyDropboxResponsable<OkUp, ErrUp, ReqUp>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
             .subscribe(onNext: { completionHandler($0) },
-                       onError: { self.errorHandlerRx!($0) },
+                       onError: { self.errorHandlerRx($0) },
                        onCompleted: { print("upload completed.") })
             .addDisposableTo(disposeBag)
     }
@@ -95,6 +79,7 @@ extension DropboxRequestRx {
     public typealias ErrLiSerializer = Files.ListFolderErrorSerializer
     public typealias ReqLi = RpcRequest<OkLiSerializer, ErrLiSerializer>
     
+    /// Initial listing request.
     public func listing(all: Bool, doneHandler: @escaping ([OkUp]) -> Void) {
         let request = client.files.listFolder(path: fullPath)
         let responsable = AnyDropboxResponsable<OkLi, ErrLi, ReqLi>(dropboxResponsable: request.response)
@@ -114,7 +99,7 @@ extension DropboxRequestRx {
                 }
                 
             },
-                       onError: { self.errorHandlerRx!($0) },
+                       onError: { self.errorHandlerRx($0) },
                        onCompleted:  { print("initialListing completed.") })
             .addDisposableTo(disposeBag)
     }
@@ -123,9 +108,8 @@ extension DropboxRequestRx {
     public typealias ErrLiConSerializer = Files.ListFolderContinueErrorSerializer
     public typealias ReqLiCon = RpcRequest<OkLiSerializer, ErrLiConSerializer>
     
-    public func continueListing(from cursor: String,
-                         previousResults: [OkUp],
-                         doneHandler: @escaping ([OkUp]) -> Void) {
+    /// Continued listing request.
+    public func continueListing(from cursor: String, previousResults: [OkUp], doneHandler: @escaping ([OkUp]) -> Void) {
         let request = client.files.listFolderContinue(cursor: cursor)
         let responsable = AnyDropboxResponsable<OkLi, ErrLiCon, ReqLiCon>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
@@ -143,7 +127,7 @@ extension DropboxRequestRx {
                     doneHandler(previousResults + continuedResults)
                 }
             },
-                       onError: { self.errorHandlerRx!($0) },
+                       onError: { self.errorHandlerRx($0) },
                        onCompleted:  { print("continueListing completed.") })
             .addDisposableTo(disposeBag)
     }
@@ -162,14 +146,18 @@ extension DropboxRequestRx {
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
             .subscribe(onNext: { completionHandler($0) },
-                       onError: { self.errorHandlerRx!($0) },
+                       onError: { self.errorHandlerRx($0) },
                        onCompleted: { print("folderCreation completed.") })
             .addDisposableTo(disposeBag)
     }
 }
 
 /// Error handling.
-extension DropboxRequestRx {
+protocol DirPathErrorHandlable {
+    func handleDirPathError(doneHandler: @escaping () -> Void)
+}
+
+extension DropboxRequestRx : DirPathErrorHandlable {
     
     /// Check and create dir path when needed.
     /// Always check path one level above, since path the process only triggered
@@ -194,38 +182,18 @@ extension DropboxRequestRx {
     }
 }
 
-///
-extension DropboxRequestRx {
-    
-    func makeSureNoNameConflict(client: DropboxClient,
-                                on queue: DispatchQueue? = nil,
-                                with name: String,
-                                under dir: String,
-                                nameConflictHandler: @escaping () -> Void,
-                                completionHandler: @escaping ([Files.Metadata]) -> Void,
-                                errorHandler: @escaping (Error) -> Void) {
-        let q = queue ?? DispatchQueue.main
-        listFolderAll(client: client, on: q, path: dir, doneHandler: {
-            ($0.map { $0.name }).contains(name) ? nameConflictHandler() : completionHandler($0)
-        }, errorHandler: errorHandler)
+/// Returns max Int for all given strings' tailing parts seperated by seperator.
+func maxTailingInt(among names: [String], by seperator: String) -> Int? {
+    guard names.count > 0 else {
+        return nil
     }
-    
-    
-    
-    
-    
-    func maxTailingInt(among names: [String], seperator: String) -> Int? {
-        guard names.count > 0 else {
-            return nil
-        }
-        let intStrings = names.map { $0.splitInReversedOrder(by: seperator)?.right }
-        guard intStrings.contains(where: { $0 == nil }) == false else {
-            return nil
-        }
-        guard intStrings.contains(where: { Int($0!) == nil }) == false else {
-            return nil
-        }
-        let ints = intStrings.map { Int($0!)! }
-        return ints.reduce(ints.first!, { max($0, $1) })
+    let intStrings = names.map { $0.splitInReversedOrder(by: seperator)?.right }
+    guard intStrings.contains(where: { $0 == nil }) == false else {
+        return nil
     }
+    guard intStrings.contains(where: { Int($0!) == nil }) == false else {
+        return nil
+    }
+    let ints = intStrings.map { Int($0!)! }
+    return ints.reduce(ints.first!, { max($0, $1) })
 }
