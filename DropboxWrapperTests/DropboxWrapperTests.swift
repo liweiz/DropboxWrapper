@@ -7,24 +7,51 @@
 //
 
 import XCTest
+import SwiftyDropbox
 @testable import DropboxWrapper
 
-class DropboxWrapperTests: XCTestCase {
+class BaseTestCase: XCTestCase {
+    let timeout: TimeInterval = 30.0
+    
+    var client: DropboxClient!
+    var rootDir: String!
+    var worker: DropboxWorker!
     
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        
+        client = DropboxClient(accessToken: "_t5sqh9TeTsAAAAAAAAACVRFDVY8aEGcbAGonfnNuhh5ine_r1uMRAjJK4_a_3XX")
+        rootDir = "https://www.dropbox.com"
+        worker = DropboxWorker(client: client, dispatchQueues: [])
     }
     
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+}
+
+class DropboxWrapperTests: BaseTestCase {
+    
+    
+    func testListingRequestRx() {
+        // Given
+        let path = Path(dirPath: "", objName: "")
+        
+        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Listing: \($0.description)") })
+        let expectation = self.expectation(description: "Listing request should succeed: \(request.fullPath)")
+        var listed: [DropboxRequestRx.OkUp]?
+        print("1")
+        // When
+        request.listing(all: false, doneHandler: {
+            listed = $0
+            print("OK Listing: \($0)")
+            expectation.fulfill()
+        })
+        print("2")
+        
+        waitForExpectations(timeout: timeout, handler: nil)
+        
+        // Then
+        XCTAssertNotNil(listed)
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
     
     func testPerformanceExample() {
         // This is an example of a performance test case.

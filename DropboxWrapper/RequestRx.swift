@@ -37,6 +37,7 @@ public func createDropboxRequestRx(worker: DropboxWorker, path: Path, errorHandl
     req.worker = worker
     req.path = path
     req.errorHandler = errorHandler
+    print("requestRx created.")
     return req
 }
 
@@ -81,9 +82,13 @@ extension DropboxRequestRx : RequestMakable {
     
     /// Initial listing request.
     public func listing(all: Bool, doneHandler: @escaping ([OkUp]) -> Void) {
+        print("listing start.")
         let request = client.files.listFolder(path: fullPath)
+        print("listing request set.")
         let responsable = AnyDropboxResponsable<OkLi, ErrLi, ReqLi>(dropboxResponsable: request.response)
+        print("listing responsable set.")
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
+        print("listing observable set.")
         observable
             .subscribe(onNext: {
                 guard let initialResults = $0.entries as? [OkUp] else {

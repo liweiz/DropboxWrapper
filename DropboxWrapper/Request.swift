@@ -11,9 +11,7 @@ import SwiftyDropbox
 import RxSwift
 //import Alamofire
 
-//App key: y87c23cufz9ds2k
-//App secret: hltjj0dhg866hek
-//access token: _t5sqh9TeTsAAAAAAAAABzyJ2nBj3OG1wocKmGMCPOCYziDUnXKN6xQCdh21XNTt
+
 
 /// Client and alternative queues to work with API.
 public struct DropboxWorker {
@@ -37,7 +35,7 @@ open class DropboxRequest {
     var path: Path!
     public var dirPath: String { return path.dirPath }
     public var objName: String { return path.objName }
-    public var fullPath: String { return path.dirPath + "/" + path!.objName }
+    public var fullPath: String { return path.dirPath + (path.dirPath.characters.count == 0 ? "" : "/") + path!.objName }
     public var dirPathUrl: URL? {
         guard let url = URL(string: dirPath) else {
             return nil

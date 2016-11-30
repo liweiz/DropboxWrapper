@@ -11,13 +11,16 @@
 		EE1EA6941DED311100B176EB /* DropboxWrapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6931DED311100B176EB /* DropboxWrapperTests.swift */; };
 		EE1EA6961DED311100B176EB /* DropboxWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = EE1EA6881DED311100B176EB /* DropboxWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE1EA6A01DED314700B176EB /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA69F1DED314700B176EB /* Request.swift */; };
-		EE1EA6E51DED3ADC00B176EB /* SwiftyDropbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E41DED3ADC00B176EB /* SwiftyDropbox.framework */; };
-		EE1EA6E71DED3B0600B176EB /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E61DED3B0600B176EB /* Alamofire.framework */; };
-		EE1EA6EA1DED3B9B00B176EB /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E91DED3B9B00B176EB /* RxSwift.framework */; };
 		EE1EA6EE1DED3C5A00B176EB /* ConvertedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6ED1DED3C5A00B176EB /* ConvertedError.swift */; };
 		EE1EA6F01DED3D0000B176EB /* TypeErasedResponseFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6EF1DED3D0000B176EB /* TypeErasedResponseFunc.swift */; };
 		EE1EA6F21DED3D6400B176EB /* RequestRx.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6F11DED3D6400B176EB /* RequestRx.swift */; };
+		EE8E42E81DEE8E71007487BC /* SwiftyDropbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E41DED3ADC00B176EB /* SwiftyDropbox.framework */; };
+		EE8E42E91DEE8E83007487BC /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E61DED3B0600B176EB /* Alamofire.framework */; };
+		EE8E42EC1DEE915A007487BC /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E91DED3B9B00B176EB /* RxSwift.framework */; };
 		EEE7F3931DEE287F00ED5C8D /* StringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE7F3921DEE287F00ED5C8D /* StringHelper.swift */; };
+		EEFAFEEC1DEE70E50002B381 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E61DED3B0600B176EB /* Alamofire.framework */; };
+		EEFAFEED1DEE70E90002B381 /* RxSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E91DED3B9B00B176EB /* RxSwift.framework */; };
+		EEFAFEEE1DEE70EF0002B381 /* SwiftyDropbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E41DED3ADC00B176EB /* SwiftyDropbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +32,18 @@
 			remoteInfo = DropboxWrapper;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EE8E42EA1DEE902B007487BC /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		EE1EA6851DED311100B176EB /* DropboxWrapper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DropboxWrapper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,9 +67,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EE1EA6E51DED3ADC00B176EB /* SwiftyDropbox.framework in Frameworks */,
-				EE1EA6E71DED3B0600B176EB /* Alamofire.framework in Frameworks */,
-				EE1EA6EA1DED3B9B00B176EB /* RxSwift.framework in Frameworks */,
+				EEFAFEEC1DEE70E50002B381 /* Alamofire.framework in Frameworks */,
+				EEFAFEED1DEE70E90002B381 /* RxSwift.framework in Frameworks */,
+				EEFAFEEE1DEE70EF0002B381 /* SwiftyDropbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,7 +77,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EE8E42EC1DEE915A007487BC /* RxSwift.framework in Frameworks */,
 				EE1EA68F1DED311100B176EB /* DropboxWrapper.framework in Frameworks */,
+				EE8E42E81DEE8E71007487BC /* SwiftyDropbox.framework in Frameworks */,
+				EE8E42E91DEE8E83007487BC /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,6 +179,8 @@
 				EE1EA68A1DED311100B176EB /* Sources */,
 				EE1EA68B1DED311100B176EB /* Frameworks */,
 				EE1EA68C1DED311100B176EB /* Resources */,
+				EE8E42EA1DEE902B007487BC /* CopyFiles */,
+				EE8E42EB1DEE90A2007487BC /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -233,12 +253,29 @@
 /* Begin PBXShellScriptBuildPhase section */
 		EE1EA6E81DED3B1C00B176EB /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			files = (
 			);
 			inputPaths = (
 				"$(SRCROOT)/Carthage/Build/iOS/SwiftyDropbox.framework\n$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/RxSwift.framework",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+		EE8E42EB1DEE90A2007487BC /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/SwiftyDropbox.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/RxSwift.framework",
 			);
 			outputPaths = (
 			);
@@ -433,6 +470,10 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = 4LRPEBVABG;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = DropboxWrapperTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Liwei.TCTA.DropboxWrapperTests;
@@ -446,6 +487,10 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				DEVELOPMENT_TEAM = 4LRPEBVABG;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = DropboxWrapperTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.Liwei.TCTA.DropboxWrapperTests;
