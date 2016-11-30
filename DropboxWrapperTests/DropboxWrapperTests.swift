@@ -33,11 +33,11 @@ class DropboxWrapperTests: BaseTestCase {
     func testListingRequestRx() {
         // Given
         let path = Path(dirPath: "", objName: "")
-        
         let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Listing: \($0.description)") })
         let expectation = self.expectation(description: "Listing request should succeed: \(request.fullPath)")
-        var listed: [DropboxRequestRx.OkUp]?
+        var listed: [DropboxRequestRx.LiResultEntry]?
         print("1")
+        
         // When
         request.listing(all: false, doneHandler: {
             listed = $0
@@ -50,6 +50,28 @@ class DropboxWrapperTests: BaseTestCase {
         
         // Then
         XCTAssertNotNil(listed)
+    }
+    
+    func testCreateFolderRequestRx() {
+        // Given
+        let path = Path(dirPath: "/", objName: "testFolderInRootDir")
+        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR CreateFolder: \($0.description)") })
+        let expectation = self.expectation(description: "CreateFolder request should succeed: \(request.fullPath)")
+        var created: DropboxRequestRx.OkCr?
+        print("1")
+        
+        // When
+        request.createFolder(completionHandler: {
+            created = $0
+            print("OK Listing: \($0)")
+            expectation.fulfill()
+        })
+        print("2")
+        
+        waitForExpectations(timeout: timeout, handler: nil)
+        
+        // Then
+        XCTAssertNotNil(created)
     }
     
     

@@ -45,10 +45,11 @@ public func createDropboxRequestRx(worker: DropboxWorker, path: Path, errorHandl
 protocol RequestMakable {
     associatedtype ResultA
     associatedtype ResultB
+    associatedtype ResultC
     func upload(fileData: Data, completionHandler: @escaping (ResultA) -> Void)
-    func listing(all: Bool, doneHandler: @escaping ([ResultA]) -> Void)
-    func continueListing(from cursor: String, previousResults: [ResultA], doneHandler: @escaping ([ResultA]) -> Void)
-    func createFolder(completionHandler: @escaping (ResultB) -> Void)
+    func listing(all: Bool, doneHandler: @escaping ([ResultB]) -> Void)
+    func continueListing(from cursor: String, previousResults: [ResultB], doneHandler: @escaping ([ResultB]) -> Void)
+    func createFolder(completionHandler: @escaping (ResultC) -> Void)
 }
 
 extension DropboxRequestRx : RequestMakable {
@@ -79,9 +80,10 @@ extension DropboxRequestRx : RequestMakable {
     public typealias OkLiSerializer = Files.ListFolderResultSerializer
     public typealias ErrLiSerializer = Files.ListFolderErrorSerializer
     public typealias ReqLi = RpcRequest<OkLiSerializer, ErrLiSerializer>
+    public typealias LiResultEntry = Files.Metadata
     
     /// Initial listing request.
-    public func listing(all: Bool, doneHandler: @escaping ([OkUp]) -> Void) {
+    public func listing(all: Bool, doneHandler: @escaping ([LiResultEntry]) -> Void) {
         print("listing start.")
         let request = client.files.listFolder(path: fullPath)
         print("listing request set.")
@@ -91,7 +93,8 @@ extension DropboxRequestRx : RequestMakable {
         print("listing observable set.")
         observable
             .subscribe(onNext: {
-                guard let initialResults = $0.entries as? [OkUp] else {
+                print("listing raw result: \($0)")
+                guard let initialResults = $0.entries as? [LiResultEntry] else {
                     print("initialListing results type not consistent.")
                     return
                 }
@@ -114,13 +117,13 @@ extension DropboxRequestRx : RequestMakable {
     public typealias ReqLiCon = RpcRequest<OkLiSerializer, ErrLiConSerializer>
     
     /// Continued listing request.
-    public func continueListing(from cursor: String, previousResults: [OkUp], doneHandler: @escaping ([OkUp]) -> Void) {
+    public func continueListing(from cursor: String, previousResults: [LiResultEntry], doneHandler: @escaping ([LiResultEntry]) -> Void) {
         let request = client.files.listFolderContinue(cursor: cursor)
         let responsable = AnyDropboxResponsable<OkLi, ErrLiCon, ReqLiCon>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
             .subscribe(onNext: {
-                guard let continuedResults = $0.entries as? [OkUp] else {
+                guard let continuedResults = $0.entries as? [LiResultEntry] else {
                     print("continueListing results type not consistent.")
                     return
                 }
@@ -146,9 +149,13 @@ extension DropboxRequestRx : RequestMakable {
     public typealias ReqCr = RpcRequest<OkCrSerializer, ErrCrSerializer>
     
     public func createFolder(completionHandler: @escaping (OkCr) -> Void) {
+        print("createFolder start.")
         let request = client.files.createFolder(path: fullPath)
+        print("createFolder request set.")
         let responsable = AnyDropboxResponsable<OkCr, ErrCr, ReqCr>(dropboxResponsable: request.response)
+        print("createFolder responsable set.")
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
+        print("createFolder observable set.")
         observable
             .subscribe(onNext: { completionHandler($0) },
                        onError: { self.errorHandlerRx($0) },
