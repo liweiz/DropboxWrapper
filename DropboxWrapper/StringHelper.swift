@@ -13,7 +13,7 @@ extension String {
         return String(characters.reversed())
     }
     
-    /// split splits the string into max 3 parts: the heading part, the string that is used to split and the tailing part. It returns nil if byString is not found.
+    /// Split splits the string into max 3 parts: the heading part, the string that is used to split and the tailing part. It returns nil if byString is not found.
     func splitInReversedOrder(by aString: String) -> (left: String, right: String)? {
         let reversedSelf = reversed
         let reversedGiven = aString.reversed

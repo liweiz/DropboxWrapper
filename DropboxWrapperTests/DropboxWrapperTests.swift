@@ -11,7 +11,19 @@ import SwiftyDropbox
 @testable import DropboxWrapper
 
 class BaseTestCase: XCTestCase {
-    let timeout: TimeInterval = 30.0
+    let timeout: TimeInterval = 15.0
+    
+    enum StoryLine {
+        case listRoot
+        case listContinued
+        case createFolder
+        case upload
+    }
+    
+    let storyLine: Array<(StoryLine, String, String)> = [
+        (.listRoot, "", "")
+    ]
+    
     
     var client: DropboxClient!
     var rootDir: String!
@@ -21,30 +33,31 @@ class BaseTestCase: XCTestCase {
         super.setUp()
         
         client = DropboxClient(accessToken: "_t5sqh9TeTsAAAAAAAAACVRFDVY8aEGcbAGonfnNuhh5ine_r1uMRAjJK4_a_3XX")
-        rootDir = "https://www.dropbox.com"
         worker = DropboxWorker(client: client, dispatchQueues: [])
     }
     
+    func createATextFile() -> Data? {
+        let content = "Just for testing."
+        return content.data(using: .unicode)
+    }
 }
 
 class DropboxWrapperTests: BaseTestCase {
     
     
-    func testListingRequestRx() {
+    func testListFolderRequestRx() {
         // Given
         let path = Path(dirPath: "", objName: "")
-        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Listing: \($0.description)") })
-        let expectation = self.expectation(description: "Listing request should succeed: \(request.fullPath)")
+        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR ListFolder: \($0.description)") })
+        let expectation = self.expectation(description: "ListFolder request should succeed: \(request.fullPath)")
         var listed: [DropboxRequestRx.LiResultEntry]?
-        print("1")
         
         // When
-        request.listing(all: false, doneHandler: {
+        request.listFolder(all: false, doneHandler: {
             listed = $0
-            print("OK Listing: \($0)")
+            print("OK ListFolder: \($0)")
             expectation.fulfill()
         })
-        print("2")
         
         waitForExpectations(timeout: timeout, handler: nil)
         
@@ -58,15 +71,13 @@ class DropboxWrapperTests: BaseTestCase {
         let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR CreateFolder: \($0.description)") })
         let expectation = self.expectation(description: "CreateFolder request should succeed: \(request.fullPath)")
         var created: DropboxRequestRx.OkCr?
-        print("1")
         
         // When
         request.createFolder(completionHandler: {
             created = $0
-            print("OK Listing: \($0)")
+            print("OK CreateFolder: \($0)")
             expectation.fulfill()
         })
-        print("2")
         
         waitForExpectations(timeout: timeout, handler: nil)
         
@@ -74,12 +85,70 @@ class DropboxWrapperTests: BaseTestCase {
         XCTAssertNotNil(created)
     }
     
+    func testUploadRequestRx() {
+        // Given
+        let path = Path(dirPath: "/testFolderInRootDir/", objName: "text_0")
+        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Upload: \($0.description)") })
+        let expectation = self.expectation(description: "Upload request should succeed: \(request.fullPath)")
+        let toUpload = createATextFile()
+        var uploaded: DropboxRequestRx.OkUp?
+        
+        // When
+        request.upload(fileData: toUpload!, completionHandler: {
+            uploaded = $0
+            print("OK Upload: \($0)")
+            expectation.fulfill()
+        })
+        
+        waitForExpectations(timeout: timeout, handler: nil)
+        
+        // Then
+        XCTAssertNotNil(uploaded)
+    }
     
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func testStringReversed() {
+        // Given
+        let aString = "ab cde f ghij"
+        // When
+        let reversed = aString.reversed
+        
+        // Then
+        XCTAssertEqual(reversed, "jihg f edc ba")
+    }
+    
+    /// String sequence
+    func testMaxTailingInt() {
+        // Given
+        let strings = [
+            "a 4",
+            "v 1",
+            " -5"
+        ]
+        // When correct split
+        let okMax = strings.maxTailingInt(by: " ")
+        let nilMax = strings.maxTailingInt(by: "1")
+        
+        // Then
+        XCTAssertEqual(okMax, 4)
+        XCTAssertNil(nilMax)
+    }
+    
+    /// String
+    func testStringSplitInReversedOrder() {
+        // Given
+        let aString = "ab cde f ghij"
+        // When correct split
+        let correctSplit = aString.splitInReversedOrder(by: " ")
+        
+        // Then
+        XCTAssertEqual(correctSplit?.left, "ab cde f")
+        XCTAssertEqual(correctSplit?.right, "ghij")
+        
+        // When not found
+        let notFoundSplit = aString.splitInReversedOrder(by: "")
+        
+        // Then
+        XCTAssertNil(notFoundSplit)
     }
     
 }

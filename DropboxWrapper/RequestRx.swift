@@ -47,8 +47,8 @@ protocol RequestMakable {
     associatedtype ResultB
     associatedtype ResultC
     func upload(fileData: Data, completionHandler: @escaping (ResultA) -> Void)
-    func listing(all: Bool, doneHandler: @escaping ([ResultB]) -> Void)
-    func continueListing(from cursor: String, previousResults: [ResultB], doneHandler: @escaping ([ResultB]) -> Void)
+    func listFolder(all: Bool, doneHandler: @escaping ([ResultB]) -> Void)
+    func continueListFolder(from cursor: String, previousResults: [ResultB], doneHandler: @escaping ([ResultB]) -> Void)
     func createFolder(completionHandler: @escaping (ResultC) -> Void)
 }
 
@@ -63,7 +63,7 @@ extension DropboxRequestRx : RequestMakable {
     public typealias ReqUp = UploadRequest<OkUpSerializer, ErrUpSerializer>
     
     public func upload(fileData: Data, completionHandler: @escaping (OkUp) -> Void) {
-        let request = client.files.upload(path: dirPath, input: fileData)
+        let request = client.files.upload(path: fullPath, input: fileData)
         let responsable = AnyDropboxResponsable<OkUp, ErrUp, ReqUp>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
@@ -83,7 +83,7 @@ extension DropboxRequestRx : RequestMakable {
     public typealias LiResultEntry = Files.Metadata
     
     /// Initial listing request.
-    public func listing(all: Bool, doneHandler: @escaping ([LiResultEntry]) -> Void) {
+    public func listFolder(all: Bool, doneHandler: @escaping ([LiResultEntry]) -> Void) {
         print("listing start.")
         let request = client.files.listFolder(path: fullPath)
         print("listing request set.")
@@ -99,7 +99,7 @@ extension DropboxRequestRx : RequestMakable {
                     return
                 }
                 if all && $0.hasMore {
-                    self.continueListing(from: $0.cursor,
+                    self.continueListFolder(from: $0.cursor,
                                          previousResults: initialResults,
                                          doneHandler: doneHandler)
                 } else {
@@ -117,7 +117,7 @@ extension DropboxRequestRx : RequestMakable {
     public typealias ReqLiCon = RpcRequest<OkLiSerializer, ErrLiConSerializer>
     
     /// Continued listing request.
-    public func continueListing(from cursor: String, previousResults: [LiResultEntry], doneHandler: @escaping ([LiResultEntry]) -> Void) {
+    public func continueListFolder(from cursor: String, previousResults: [LiResultEntry], doneHandler: @escaping ([LiResultEntry]) -> Void) {
         let request = client.files.listFolderContinue(cursor: cursor)
         let responsable = AnyDropboxResponsable<OkLi, ErrLiCon, ReqLiCon>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
@@ -128,7 +128,7 @@ extension DropboxRequestRx : RequestMakable {
                     return
                 }
                 if $0.hasMore {
-                    self.continueListing(from: $0.cursor,
+                    self.continueListFolder(from: $0.cursor,
                                          previousResults: previousResults + continuedResults,
                                          doneHandler: doneHandler)
                 } else {
@@ -183,8 +183,8 @@ extension DropboxRequestRx : DirPathErrorHandlable {
         let dirPathAbove = urlDir.deletingLastPathComponent().absoluteString
         let pathAbove = Path(dirPath: dirPathAbove, objName: objNameAbove)
         let sharedWorker = DropboxWorker(client: client, dispatchQueues: queues)
-        let listingRequest = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: errorHandler!)
-        listingRequest.listing(all: false, doneHandler: { _ in
+        let listFolderRequest = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: errorHandler!)
+        listFolderRequest.listFolder(all: false, doneHandler: { _ in
             /// Above level exists.
             let createFolderRequestRx = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: self.errorHandler!)
             createFolderRequestRx.createFolder(completionHandler: { _ in
@@ -194,18 +194,4 @@ extension DropboxRequestRx : DirPathErrorHandlable {
     }
 }
 
-/// Returns max Int for all given strings' tailing parts seperated by seperator.
-func maxTailingInt(among names: [String], by seperator: String) -> Int? {
-    guard names.count > 0 else {
-        return nil
-    }
-    let intStrings = names.map { $0.splitInReversedOrder(by: seperator)?.right }
-    guard intStrings.contains(where: { $0 == nil }) == false else {
-        return nil
-    }
-    guard intStrings.contains(where: { Int($0!) == nil }) == false else {
-        return nil
-    }
-    let ints = intStrings.map { Int($0!)! }
-    return ints.reduce(ints.first!, { max($0, $1) })
-}
+
