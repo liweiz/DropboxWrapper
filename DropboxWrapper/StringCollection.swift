@@ -19,7 +19,7 @@ extension Collection where Self.Iterator.Element == String {
             switch $0 {
             case nil:
                 return true
-            case let _ as Int:
+            case _ as Int:
                 return true
             default:
                 return false

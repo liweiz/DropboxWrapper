@@ -11,7 +11,6 @@
 		EE1EA6941DED311100B176EB /* DropboxWrapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6931DED311100B176EB /* DropboxWrapperTests.swift */; };
 		EE1EA6961DED311100B176EB /* DropboxWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = EE1EA6881DED311100B176EB /* DropboxWrapper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE1EA6A01DED314700B176EB /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA69F1DED314700B176EB /* Request.swift */; };
-		EE1EA6EE1DED3C5A00B176EB /* ConvertedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6ED1DED3C5A00B176EB /* ConvertedError.swift */; };
 		EE1EA6F01DED3D0000B176EB /* TypeErasedResponseFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6EF1DED3D0000B176EB /* TypeErasedResponseFunc.swift */; };
 		EE1EA6F21DED3D6400B176EB /* RequestRx.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1EA6F11DED3D6400B176EB /* RequestRx.swift */; };
 		EE8E42E81DEE8E71007487BC /* SwiftyDropbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE1EA6E41DED3ADC00B176EB /* SwiftyDropbox.framework */; };
@@ -57,7 +56,6 @@
 		EE1EA6E41DED3ADC00B176EB /* SwiftyDropbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftyDropbox.framework; path = Carthage/Build/iOS/SwiftyDropbox.framework; sourceTree = "<group>"; };
 		EE1EA6E61DED3B0600B176EB /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
 		EE1EA6E91DED3B9B00B176EB /* RxSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RxSwift.framework; path = Carthage/Build/iOS/RxSwift.framework; sourceTree = "<group>"; };
-		EE1EA6ED1DED3C5A00B176EB /* ConvertedError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvertedError.swift; sourceTree = "<group>"; };
 		EE1EA6EF1DED3D0000B176EB /* TypeErasedResponseFunc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeErasedResponseFunc.swift; sourceTree = "<group>"; };
 		EE1EA6F11DED3D6400B176EB /* RequestRx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestRx.swift; sourceTree = "<group>"; };
 		EE8E42EE1DEFE76D007487BC /* StringCollection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringCollection.swift; sourceTree = "<group>"; };
@@ -112,7 +110,6 @@
 			isa = PBXGroup;
 			children = (
 				EE1EA6881DED311100B176EB /* DropboxWrapper.h */,
-				EE1EA6ED1DED3C5A00B176EB /* ConvertedError.swift */,
 				EE1EA69F1DED314700B176EB /* Request.swift */,
 				EE1EA6F11DED3D6400B176EB /* RequestRx.swift */,
 				EE8E42EE1DEFE76D007487BC /* StringCollection.swift */,
@@ -296,7 +293,6 @@
 				EE8E42EF1DEFE76D007487BC /* StringCollection.swift in Sources */,
 				EE1EA6A01DED314700B176EB /* Request.swift in Sources */,
 				EE1EA6F21DED3D6400B176EB /* RequestRx.swift in Sources */,
-				EE1EA6EE1DED3C5A00B176EB /* ConvertedError.swift in Sources */,
 				EEE7F3931DEE287F00ED5C8D /* StringHelper.swift in Sources */,
 				EE1EA6F01DED3D0000B176EB /* TypeErasedResponseFunc.swift in Sources */,
 			);

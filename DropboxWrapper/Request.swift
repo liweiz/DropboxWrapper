@@ -9,9 +9,6 @@
 import Foundation
 import SwiftyDropbox
 import RxSwift
-//import Alamofire
-
-
 
 /// Client and alternative queues to work with API.
 public struct DropboxWorker {
@@ -21,7 +18,9 @@ public struct DropboxWorker {
 
 /// Path to work with API.
 public struct Path {
+    /// Path of directory the target exists.
     public let dirPath: String
+    /// Name of target.
     public let objName: String
 }
 

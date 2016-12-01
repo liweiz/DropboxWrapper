@@ -69,7 +69,7 @@ extension DropboxRequestRx : RequestMakable {
         observable
             .subscribe(onNext: { completionHandler($0) },
                        onError: { self.errorHandlerRx($0) },
-                       onCompleted: { print("upload completed.") })
+                       onCompleted: { print("COMPLETED upload.") })
             .addDisposableTo(disposeBag)
     }
     
@@ -84,31 +84,22 @@ extension DropboxRequestRx : RequestMakable {
     
     /// Initial listing request.
     public func listFolder(all: Bool, doneHandler: @escaping ([LiResultEntry]) -> Void) {
-        print("listing start.")
         let request = client.files.listFolder(path: fullPath)
-        print("listing request set.")
         let responsable = AnyDropboxResponsable<OkLi, ErrLi, ReqLi>(dropboxResponsable: request.response)
-        print("listing responsable set.")
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
-        print("listing observable set.")
         observable
             .subscribe(onNext: {
-                print("listing raw result: \($0)")
-                guard let initialResults = $0.entries as? [LiResultEntry] else {
-                    print("initialListing results type not consistent.")
-                    return
-                }
                 if all && $0.hasMore {
                     self.continueListFolder(from: $0.cursor,
-                                         previousResults: initialResults,
+                                         previousResults: $0.entries,
                                          doneHandler: doneHandler)
                 } else {
-                    doneHandler(initialResults)
+                    doneHandler($0.entries)
                 }
                 
             },
                        onError: { self.errorHandlerRx($0) },
-                       onCompleted:  { print("initialListing completed.") })
+                       onCompleted:  { print("COMPLETED listFolder") })
             .addDisposableTo(disposeBag)
     }
     
@@ -123,20 +114,16 @@ extension DropboxRequestRx : RequestMakable {
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
             .subscribe(onNext: {
-                guard let continuedResults = $0.entries as? [LiResultEntry] else {
-                    print("continueListing results type not consistent.")
-                    return
-                }
                 if $0.hasMore {
                     self.continueListFolder(from: $0.cursor,
-                                         previousResults: previousResults + continuedResults,
+                                         previousResults: previousResults + $0.entries,
                                          doneHandler: doneHandler)
                 } else {
-                    doneHandler(previousResults + continuedResults)
+                    doneHandler(previousResults + $0.entries)
                 }
             },
                        onError: { self.errorHandlerRx($0) },
-                       onCompleted:  { print("continueListing completed.") })
+                       onCompleted:  { print("COMPLETED continueListFolder.") })
             .addDisposableTo(disposeBag)
     }
     
@@ -149,17 +136,13 @@ extension DropboxRequestRx : RequestMakable {
     public typealias ReqCr = RpcRequest<OkCrSerializer, ErrCrSerializer>
     
     public func createFolder(completionHandler: @escaping (OkCr) -> Void) {
-        print("createFolder start.")
         let request = client.files.createFolder(path: fullPath)
-        print("createFolder request set.")
         let responsable = AnyDropboxResponsable<OkCr, ErrCr, ReqCr>(dropboxResponsable: request.response)
-        print("createFolder responsable set.")
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
-        print("createFolder observable set.")
         observable
             .subscribe(onNext: { completionHandler($0) },
                        onError: { self.errorHandlerRx($0) },
-                       onCompleted: { print("folderCreation completed.") })
+                       onCompleted: { print("COMPLETED folderCreation.") })
             .addDisposableTo(disposeBag)
     }
 }
