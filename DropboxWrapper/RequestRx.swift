@@ -37,7 +37,6 @@ public func createDropboxRequestRx(worker: DropboxWorker, path: Path, errorHandl
     req.worker = worker
     req.path = path
     req.errorHandler = errorHandler
-    print("requestRx created.")
     return req
 }
 
@@ -55,7 +54,6 @@ protocol RequestMakable {
 extension DropboxRequestRx : RequestMakable {
     
     /// Upload request.
-    
     public typealias OkUp = Files.FileMetadata
     public typealias ErrUp = Files.UploadError
     public typealias OkUpSerializer = Files.FileMetadataSerializer
@@ -74,7 +72,6 @@ extension DropboxRequestRx : RequestMakable {
     }
     
     /// List request
-    
     public typealias OkLi = Files.ListFolderResult
     public typealias ErrLi = Files.ListFolderError
     public typealias OkLiSerializer = Files.ListFolderResultSerializer
@@ -128,7 +125,6 @@ extension DropboxRequestRx : RequestMakable {
     }
     
     /// Create folder.
-    
     public typealias OkCr = Files.FolderMetadata
     public typealias ErrCr = Files.CreateFolderError
     public typealias OkCrSerializer = Files.FolderMetadataSerializer
@@ -143,6 +139,23 @@ extension DropboxRequestRx : RequestMakable {
             .subscribe(onNext: { completionHandler($0) },
                        onError: { self.errorHandlerRx($0) },
                        onCompleted: { print("COMPLETED folderCreation.") })
+            .addDisposableTo(disposeBag)
+    }
+    
+    /// Delete.
+    public typealias OkDeSerializer = Files.MetadataSerializer
+    public typealias ErrDeSerializer = Files.DeleteErrorSerializer
+    public typealias ReqDe = RpcRequest<OkDeSerializer, ErrDeSerializer>
+    public typealias ErrDe = Files.DeleteError
+    
+    public func delete(completionHandler: @escaping (LiResultEntry) -> Void) {
+        let request = client.files.delete(path: fullPath)
+        let responsable = AnyDropboxResponsable<LiResultEntry, ErrDe, ReqDe>(dropboxResponsable: request.response)
+        let observable = observableDropboxResponse(queue: queue, responsable: responsable)
+        observable
+            .subscribe(onNext: { completionHandler($0) },
+                       onError: { self.errorHandlerRx($0) },
+                       onCompleted: { print("COMPLETED delete.") })
             .addDisposableTo(disposeBag)
     }
 }

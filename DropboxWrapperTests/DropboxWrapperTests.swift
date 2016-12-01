@@ -106,6 +106,26 @@ class DropboxWrapperTests: BaseTestCase {
         XCTAssertNotNil(uploaded)
     }
     
+    func testDeleteRequestRx() {
+        // Given
+        let path = Path(dirPath: "/", objName: "testFolderInRootDir")
+        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Delete: \($0.description)") })
+        let expectation = self.expectation(description: "Delete request should succeed: \(request.fullPath)")
+        var deleted: DropboxRequestRx.LiResultEntry?
+        
+        // When
+        request.delete(completionHandler: {
+            deleted = $0
+            print("OK Delete: \($0)")
+            expectation.fulfill()
+        })
+        
+        waitForExpectations(timeout: timeout, handler: nil)
+        
+        // Then
+        XCTAssertNotNil(deleted)
+    }
+    
     func testStringReversed() {
         // Given
         let aString = "ab cde f ghij"
