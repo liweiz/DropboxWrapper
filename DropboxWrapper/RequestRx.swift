@@ -29,8 +29,8 @@ protocol RequestMakable {
     associatedtype ResultB
     associatedtype ResultC
     func upload(fileData: Data, completionHandler: @escaping (ResultA) -> Void)
-    func listFolder(all: Bool, doneHandler: @escaping ([ResultB]) -> Void)
-    func continueListFolder(from cursor: String, previousResults: [ResultB], doneHandler: @escaping ([ResultB]) -> Void)
+    func listFolder(all: Bool, jobDoneHandler: @escaping ([ResultB]) -> Void)
+    func continueListFolder(from cursor: String, previousResults: [ResultB], jobDoneHandler: @escaping ([ResultB]) -> Void)
     func createFolder(completionHandler: @escaping (ResultC) -> Void)
 }
 
@@ -63,7 +63,7 @@ extension DropboxRequestRx : RequestMakable {
     public typealias LiResultEntry = Files.Metadata
     
     /// Initial listing request.
-    public func listFolder(all: Bool, doneHandler: @escaping ([LiResultEntry]) -> Void) {
+    public func listFolder(all: Bool, jobDoneHandler: @escaping ([LiResultEntry]) -> Void) {
         let request = client.files.listFolder(path: fullPath)
         let responsable = AnyDropboxResponsable<OkLi, ErrLi, ReqLi>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
@@ -72,9 +72,9 @@ extension DropboxRequestRx : RequestMakable {
                 if all && $0.hasMore {
                     self.continueListFolder(from: $0.cursor,
                                          previousResults: $0.entries,
-                                         doneHandler: doneHandler)
+                                         jobDoneHandler: jobDoneHandler)
                 } else {
-                    doneHandler($0.entries)
+                    jobDoneHandler($0.entries)
                 }
                 
             },
@@ -88,7 +88,7 @@ extension DropboxRequestRx : RequestMakable {
     public typealias ReqLiCon = RpcRequest<OkLiSerializer, ErrLiConSerializer>
     
     /// Continued listing request.
-    public func continueListFolder(from cursor: String, previousResults: [LiResultEntry], doneHandler: @escaping ([LiResultEntry]) -> Void) {
+    public func continueListFolder(from cursor: String, previousResults: [LiResultEntry], jobDoneHandler: @escaping ([LiResultEntry]) -> Void) {
         let request = client.files.listFolderContinue(cursor: cursor)
         let responsable = AnyDropboxResponsable<OkLi, ErrLiCon, ReqLiCon>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
@@ -97,9 +97,9 @@ extension DropboxRequestRx : RequestMakable {
                 if $0.hasMore {
                     self.continueListFolder(from: $0.cursor,
                                          previousResults: previousResults + $0.entries,
-                                         doneHandler: doneHandler)
+                                         jobDoneHandler: jobDoneHandler)
                 } else {
-                    doneHandler(previousResults + $0.entries)
+                    jobDoneHandler(previousResults + $0.entries)
                 }
             },
                        onError: { self.errorHandler($0 as! ErrorRx) },
@@ -164,7 +164,7 @@ extension DropboxRequestRx : DirPathErrorHandlable {
         let pathAbove = Path(dirPath: dirPathAbove, objName: objNameAbove)
         let sharedWorker = DropboxWorker(client: client, dispatchQueues: queues)
         let listFolderRequest = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: errorHandler)
-        listFolderRequest.listFolder(all: false, doneHandler: { _ in
+        listFolderRequest.listFolder(all: false, jobDoneHandler: { _ in
             /// Above level exists.
             let createFolderRequestRx = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: self.errorHandler)
             createFolderRequestRx.createFolder(completionHandler: { _ in
