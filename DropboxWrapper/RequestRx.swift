@@ -10,37 +10,20 @@ import Foundation
 import SwiftyDropbox
 import RxSwift
 
+/// Error type for Rx wrapper.
+public typealias ErrorRx = Swift.Error & CustomStringConvertible
+
 /// Rx wrapper for API request.
-open class DropboxRequestRx: DropboxRequest {
+open class DropboxRequestRx: DropboxRequest<ErrorRx> {
     open var disposeBag: DisposeBag = DisposeBag()
-    public var dirPathUrlRx: URL? {
-        guard let url = URL(string: dirPath) else {
-            errorHandlerRx(Files.LookupError.malformedPath(nil) as! Error)
-            return nil
-        }
-        return url
-    }
-    /// Adapter to meet the error type requirement of Rx.
-    public var errorHandlerRx: ((Error) -> Void) {
-        return {
-            guard let err = $0 as? CustomStringConvertible else {
-                return
-            }
-            self.errorHandler(err)
-        }
-    }
 }
 
-/// Constructor of DropboxRequestRx.
-public func createDropboxRequestRx(worker: DropboxWorker, path: Path, errorHandler: @escaping (CustomStringConvertible) -> Void) -> DropboxRequestRx {
-    let req = DropboxRequestRx()
-    req.worker = worker
-    req.path = path
-    req.errorHandler = errorHandler
-    return req
+/// Rx wrapper constructor.
+public func createDropboxRequestRx(worker: DropboxWorker, path: Path, errorHandler: @escaping (ErrorRx) -> Void) -> DropboxRequestRx {
+    return createDropboxRequestWrapper(worker: worker, path: path, errorHandler: errorHandler)
 }
 
-/// Requests.
+/// Abstracted requests.
 protocol RequestMakable {
     associatedtype ResultA
     associatedtype ResultB
@@ -66,7 +49,7 @@ extension DropboxRequestRx : RequestMakable {
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
             .subscribe(onNext: { completionHandler($0) },
-                       onError: { self.errorHandlerRx($0) },
+                       onError: { self.errorHandler($0 as! ErrorRx) },
                        onCompleted: { print("COMPLETED upload.") })
             .addDisposableTo(disposeBag)
     }
@@ -95,7 +78,7 @@ extension DropboxRequestRx : RequestMakable {
                 }
                 
             },
-                       onError: { self.errorHandlerRx($0) },
+                       onError: { self.errorHandler($0 as! ErrorRx) },
                        onCompleted:  { print("COMPLETED listFolder") })
             .addDisposableTo(disposeBag)
     }
@@ -119,7 +102,7 @@ extension DropboxRequestRx : RequestMakable {
                     doneHandler(previousResults + $0.entries)
                 }
             },
-                       onError: { self.errorHandlerRx($0) },
+                       onError: { self.errorHandler($0 as! ErrorRx) },
                        onCompleted:  { print("COMPLETED continueListFolder.") })
             .addDisposableTo(disposeBag)
     }
@@ -131,13 +114,14 @@ extension DropboxRequestRx : RequestMakable {
     public typealias ErrCrSerializer = Files.CreateFolderErrorSerializer
     public typealias ReqCr = RpcRequest<OkCrSerializer, ErrCrSerializer>
     
+    ///It also creates non-existing folders in its path.
     public func createFolder(completionHandler: @escaping (OkCr) -> Void) {
         let request = client.files.createFolder(path: fullPath)
         let responsable = AnyDropboxResponsable<OkCr, ErrCr, ReqCr>(dropboxResponsable: request.response)
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
             .subscribe(onNext: { completionHandler($0) },
-                       onError: { self.errorHandlerRx($0) },
+                       onError: { self.errorHandler($0 as! ErrorRx) },
                        onCompleted: { print("COMPLETED folderCreation.") })
             .addDisposableTo(disposeBag)
     }
@@ -154,7 +138,7 @@ extension DropboxRequestRx : RequestMakable {
         let observable = observableDropboxResponse(queue: queue, responsable: responsable)
         observable
             .subscribe(onNext: { completionHandler($0) },
-                       onError: { self.errorHandlerRx($0) },
+                       onError: { self.errorHandler($0 as! ErrorRx) },
                        onCompleted: { print("COMPLETED delete.") })
             .addDisposableTo(disposeBag)
     }
@@ -172,17 +156,17 @@ extension DropboxRequestRx : DirPathErrorHandlable {
     /// when the level operated on comes across path errors.
     public func handleDirPathError(doneHandler: @escaping () -> Void) {
         guard let urlDir = URL(string: dirPath) else {
-            errorHandler!(Files.LookupError.malformedPath(nil))
+            errorHandler(Files.LookupError.malformedPath(nil) as! ErrorRx)
             return
         }
         let objNameAbove = urlDir.lastPathComponent
         let dirPathAbove = urlDir.deletingLastPathComponent().absoluteString
         let pathAbove = Path(dirPath: dirPathAbove, objName: objNameAbove)
         let sharedWorker = DropboxWorker(client: client, dispatchQueues: queues)
-        let listFolderRequest = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: errorHandler!)
+        let listFolderRequest = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: errorHandler)
         listFolderRequest.listFolder(all: false, doneHandler: { _ in
             /// Above level exists.
-            let createFolderRequestRx = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: self.errorHandler!)
+            let createFolderRequestRx = createDropboxRequestRx(worker: sharedWorker, path: pathAbove, errorHandler: self.errorHandler)
             createFolderRequestRx.createFolder(completionHandler: { _ in
                 doneHandler()
             })

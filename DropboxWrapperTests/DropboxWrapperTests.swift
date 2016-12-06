@@ -13,18 +13,6 @@ import SwiftyDropbox
 class BaseTestCase: XCTestCase {
     let timeout: TimeInterval = 15.0
     
-    enum StoryLine {
-        case listRoot
-        case listContinued
-        case createFolder
-        case upload
-    }
-    
-    let storyLine: Array<(StoryLine, String, String)> = [
-        (.listRoot, "", "")
-    ]
-    
-    
     var client: DropboxClient!
     var rootDir: String!
     var worker: DropboxWorker!
@@ -32,7 +20,7 @@ class BaseTestCase: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        client = DropboxClient(accessToken: "_t5sqh9TeTsAAAAAAAAACVRFDVY8aEGcbAGonfnNuhh5ine_r1uMRAjJK4_a_3XX")
+        client = DropboxClient(accessToken: "_t5sqh9TeTsAAAAAAAAAC-6G9TGzC7PpF-No4bxjPaUVQNXnVVz3ul1Gk4nX6sr6")
         worker = DropboxWorker(client: client, dispatchQueues: [])
     }
     

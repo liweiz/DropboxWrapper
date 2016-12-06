@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 import SwiftyDropbox
 
-/// pProtocol for API response func.
+/// Protocol for API response func.
 protocol DropboxResponsable {
     associatedtype Ok
     associatedtype Err

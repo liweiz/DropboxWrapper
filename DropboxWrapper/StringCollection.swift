@@ -9,12 +9,12 @@
 import Foundation
 
 extension Collection where Self.Iterator.Element == String {
-    /// Returns max Int for all given strings' tailing parts seperated by seperator.
-    func maxTailingInt(by seperator: String) -> Int? {
+    /// Returns max Int for all given strings' tailing parts separated by separator.
+    func maxTailingInt(by separator: String) -> Int? {
         guard count > 0 else {
             return nil
         }
-        let intStrings = map { $0.splitInReversedOrder(by: seperator)?.right }
+        let intStrings = map { $0.splitInReversedOrder(by: separator)?.right }
         guard !intStrings.contains(where: {
             switch $0 {
             case nil:
