@@ -36,6 +36,24 @@ public struct Path {
         }
         return url
     }
+    public var objIsUnderRoot: Bool? {
+        return fullPath.characters.count == 0 || !(fullPath.characters.dropFirst().contains("/"))
+    }
+    /// List requests take empty string ("") as root directory, while other 
+    /// requests take "/".
+    public var pathToListObjPeers: String? {
+        guard let underRoot = objIsUnderRoot else {
+            return nil
+        }
+        if underRoot {
+            return nil
+        }
+        let withoutLastComponent = (fullPath as NSString).deletingLastPathComponent
+        if withoutLastComponent.characters.count == 0 || (withoutLastComponent.characters.count == 1 && withoutLastComponent.characters.first! == "/") {
+            return ""
+        }
+        return withoutLastComponent
+    }
 }
 
 /// Request to API.

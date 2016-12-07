@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyDropbox
 
 open class UploadWithProperNameRequest: DropboxRequestRx {
     open var versionSeparator: String!
@@ -22,24 +23,35 @@ open class UploadWithProperNameRequest: DropboxRequestRx {
     open func uploadWithProperName() {
         /// Firstly, get the proper version for this upload.
         findOutProperVersion(completionHandler: {
+            print("findOutProperVersion used names: $0")
             /// Dir path exists.
-            if let maxVer = $0 {
+            if let maxVer = ($0.map { $0.name }).maxTailingInt(by: self.versionSeparator) {
                 self.versionNo = maxVer + 1
             }
             self.upload()
         })
     }
     
-    func findOutProperVersion(completionHandler: @escaping (Int?) -> Void) {
-        let path = Path(dirPath: dirPath, objName: objName)
+    func findOutProperVersion(completionHandler: @escaping ([LiResultEntry]) -> Void) {
+        guard let pathToListObjPeers = self.path.pathToListObjPeers else {
+            fatalError("pathToListObjPeers not available.")
+        }
+        let path = Path(dirPath: pathToListObjPeers, objName: "")
         let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: handleListError)
-        request.listFolder(all: true, jobDoneHandler: { completionHandler($0.map { $0.name }.maxTailingInt(by: self.versionSeparator)) })
+        request.listFolder(all: true, jobDoneHandler: completionHandler)
     }
     
     func handleListError(err: ErrorRx) {
-        switch err {
-        case ErrLi.path:
-            upload()
+        print("findOutProperVersion error.")
+        switch err as! CallError<ErrLi> {
+        case .routeError(let boxed, _):
+            switch boxed.unboxed as ErrLi {
+            case .path(_):
+                upload()
+                print("Missing folder(s), upload directly.")
+            default:
+                errorHandler(err)
+            }
         default:
             errorHandler(err)
         }

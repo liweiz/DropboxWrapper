@@ -11,7 +11,7 @@ import SwiftyDropbox
 @testable import DropboxWrapper
 
 class BaseTestCase: XCTestCase {
-    let timeout: TimeInterval = 15.0
+    let timeout: TimeInterval = 4.0
     
     var client: DropboxClient!
     var rootDir: String!
@@ -41,7 +41,7 @@ class DropboxWrapperTests: BaseTestCase {
         var listed: [DropboxRequestRx.LiResultEntry]?
         
         // When
-        request.listFolder(all: false, doneHandler: {
+        request.listFolder(all: false, jobDoneHandler: {
             listed = $0
             print("OK ListFolder: \($0)")
             expectation.fulfill()
@@ -112,6 +112,35 @@ class DropboxWrapperTests: BaseTestCase {
         
         // Then
         XCTAssertNotNil(deleted)
+    }
+    
+    func testUploadWithProperNameRequest() {
+        func uploadOnce() {
+            // Given
+            let path = Path(dirPath: "/testFolderInRootDir/", objName: "text")
+            let toUpload = createATextFile()
+            let expectation = self.expectation(description: "createUploadWithProperNameRequest request should succeed: \(path.fullPath)")
+            var uploaded: DropboxRequestRx.OkUp?
+            let request = createUploadWithProperNameRequest(worker: worker, path: path, versionSeparator: "_", fileData: toUpload!, completionHandler: {
+                uploaded = $0
+                print("OK UploadWithProperNameRequest: \($0)")
+                expectation.fulfill()
+            }, errorHandler: { print("ERROR createUploadWithProperNameRequest: \($0.description)") })
+            
+            // When
+            request.uploadWithProperName()
+            
+            waitForExpectations(timeout: timeout, handler: nil)
+            
+            // Then
+            XCTAssertNotNil(uploaded)
+        }
+        
+//        uploadOnce()
+        
+        for _ in 0..<10 {
+            uploadOnce()
+        }
     }
     
     func testStringReversed() {
