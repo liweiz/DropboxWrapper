@@ -31,6 +31,7 @@ class BaseTestCase: XCTestCase {
 }
 
 class DropboxWrapperTests: BaseTestCase {
+    let randomNumberStringForSingleUploadAndDelete = String(arc4random())
     
     
     func testListFolderRequestRx() {
@@ -53,9 +54,29 @@ class DropboxWrapperTests: BaseTestCase {
         XCTAssertNotNil(listed)
     }
     
+    func testContinueListFolderRequestRx() {
+        // Given
+        let path = Path(dirPath: "/", objName: "testFolderInRootDir-ListAndListContinue")
+        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR ListFolder: \($0.description)") })
+        let expectation = self.expectation(description: "ContinueListFolder request should succeed: \(request.fullPath)")
+        var listed: [DropboxRequestRx.LiResultEntry]?
+        
+        // When
+        request.listFolder(all: true, jobDoneHandler: {
+            listed = $0
+            print("OK ListFolder: \($0)")
+            expectation.fulfill()
+        })
+        
+        waitForExpectations(timeout: timeout * 10, handler: nil)
+        
+        // Then
+        XCTAssertNotNil(listed)
+    }
+    
     func testCreateFolderRequestRx() {
         // Given
-        let path = Path(dirPath: "/", objName: "testFolderInRootDir")
+        let path = Path(dirPath: "/", objName: "testFolderInRootDir" + "-" + randomNumberStringForSingleUploadAndDelete)
         let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR CreateFolder: \($0.description)") })
         let expectation = self.expectation(description: "CreateFolder request should succeed: \(request.fullPath)")
         var created: DropboxRequestRx.OkCr?
@@ -75,7 +96,7 @@ class DropboxWrapperTests: BaseTestCase {
     
     func testUploadRequestRx() {
         // Given
-        let path = Path(dirPath: "/testFolderInRootDir/", objName: "text_0")
+        let path = Path(dirPath: "/testFolderInRootDir/", objName: "text_" + randomNumberStringForSingleUploadAndDelete)
         let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Upload: \($0.description)") })
         let expectation = self.expectation(description: "Upload request should succeed: \(request.fullPath)")
         let toUpload = createATextFile()
@@ -96,7 +117,7 @@ class DropboxWrapperTests: BaseTestCase {
     
     func testDeleteRequestRx() {
         // Given
-        let path = Path(dirPath: "/", objName: "testFolderInRootDir")
+        let path = Path(dirPath: "/testFolderInRootDir/", objName: "text_" + randomNumberStringForSingleUploadAndDelete)
         let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Delete: \($0.description)") })
         let expectation = self.expectation(description: "Delete request should succeed: \(request.fullPath)")
         var deleted: DropboxRequestRx.LiResultEntry?
@@ -138,7 +159,7 @@ class DropboxWrapperTests: BaseTestCase {
         
 //        uploadOnce()
         
-        for _ in 0..<10 {
+        for _ in 0..<4 {
             uploadOnce()
         }
     }
