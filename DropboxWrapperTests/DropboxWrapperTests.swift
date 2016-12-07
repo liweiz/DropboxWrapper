@@ -115,26 +115,6 @@ class DropboxWrapperTests: BaseTestCase {
         XCTAssertNotNil(uploaded)
     }
     
-    func testDeleteRequestRx() {
-        // Given
-        let path = Path(dirPath: "/testFolderInRootDir/", objName: "text_" + randomNumberStringForSingleUploadAndDelete)
-        let request = createDropboxRequestRx(worker: worker, path: path, errorHandler: { print("ERROR Delete: \($0.description)") })
-        let expectation = self.expectation(description: "Delete request should succeed: \(request.fullPath)")
-        var deleted: DropboxRequestRx.LiResultEntry?
-        
-        // When
-        request.delete(completionHandler: {
-            deleted = $0
-            print("OK Delete: \($0)")
-            expectation.fulfill()
-        })
-        
-        waitForExpectations(timeout: timeout, handler: nil)
-        
-        // Then
-        XCTAssertNotNil(deleted)
-    }
-    
     func testUploadWithProperNameRequest() {
         func uploadOnce() {
             // Given
@@ -209,4 +189,36 @@ class DropboxWrapperTests: BaseTestCase {
         XCTAssertNil(notFoundSplit)
     }
     
+    func testDeleteRequestRx() {
+        // Given
+        let pathToDelete = Path(dirPath: "/testFolderInRootDir/", objName: "textToDelete_" + randomNumberStringForSingleUploadAndDelete)
+        let request = createDropboxRequestRx(worker: worker, path: pathToDelete, errorHandler: { print("ERROR Delete: \($0.description)") })
+        let expectation = self.expectation(description: "Delete request should succeed: \(request.fullPath)")
+        var deleted: DropboxRequestRx.LiResultEntry?
+        
+        // When
+        let pathToUpload = Path(dirPath: "/testFolderInRootDir/", objName: "textToDelete_" + randomNumberStringForSingleUploadAndDelete)
+        let uploadRequest = createDropboxRequestRx(worker: worker, path: pathToUpload, errorHandler: { print("ERROR Upload: \($0.description)") })
+        let uploadExpectation = self.expectation(description: "Upload request should succeed: \(request.fullPath)")
+        let toUpload = createATextFile()
+        var uploaded: DropboxRequestRx.OkUp?
+        
+        // When
+        uploadRequest.upload(fileData: toUpload!, completionHandler: {
+            uploaded = $0
+            print("OK Upload: \($0)")
+            uploadExpectation.fulfill()
+            request.delete(completionHandler: {
+                deleted = $0
+                print("OK Delete: \($0)")
+                expectation.fulfill()
+            })
+        })
+        
+        waitForExpectations(timeout: timeout, handler: nil)
+        
+        // Then
+        XCTAssertNotNil(uploaded)
+        XCTAssertNotNil(deleted)
+    }
 }
